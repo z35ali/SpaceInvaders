@@ -4,6 +4,10 @@ import os
 import random
 import math
 
+#import module
+import winsound
+
+
 #This saves memory
 turtle.setundobuffer(1)
 #This speeds up drawing
@@ -39,7 +43,7 @@ score=0
 #Draw score
 score_pen=turtle.Turtle()
 score_pen.speed(0)
-score_pen.color("white")
+score_pen.color("red")
 score_pen.penup()
 score_pen.setposition(-290,270)
 scorestring="Score: %s" %score
@@ -59,7 +63,7 @@ playerspeed=15
 
 
 #Choose number of enemies
-number_of_enemies=5
+number_of_enemies=10
 #Creates an empty lit
 enemies=[]
 
@@ -76,7 +80,7 @@ for enemy in enemies:
     x=random.randint(-200,200)
     y=random.randint(100,250)
     enemy.setposition(x,y)
-enemyspeed=2
+enemyspeed=10
 
 
     
@@ -91,12 +95,12 @@ bullet.setheading(90)
 bullet.shapesize(0.5,0.5)
 bullet.hideturtle()
 
-bulletspeed=20
+bulletspeed=40
 
 #Define bullet state
 #ready - ready to fire
 #fire - bullet is firing
-bulletstate="ready"
+bulletstate="fire"
 
 #Move the player horizontally
 def move_left():
@@ -117,6 +121,9 @@ def fire_bullet():
     #Declare bulletstate as a global
     global bulletstate
     if bulletstate=="ready":
+        #Play laser sound
+        winsound.PlaySound("laser.wav", winsound.SND_ASYNC)
+        
         bulletstate="fire"
         #Move the bullet to just above the player
         x=player.xcor()
@@ -127,7 +134,8 @@ def fire_bullet():
 
 def isCollision(t1, t2):
     distance=math.sqrt(math.pow(t1.xcor()-t2.xcor(),2)+math.pow(t1.ycor()-t2.ycor(),2))
-    if distance<15:
+    if distance<20:
+        winsound.PlaySound("explosion.wav", winsound.SND_ASYNC)
         return True
     else:
         return False
@@ -135,8 +143,8 @@ def isCollision(t1, t2):
     
 #Create keyboard bindings
 wn.listen()
-wn.onkeypress(move_left, "Left")
-wn.onkeypress(move_right, "Right")
+wn.onkey(move_left, "Left")
+wn.onkey(move_right, "Right")
 wn.onkey(fire_bullet,"space")
 
 #Main game loop
@@ -181,10 +189,19 @@ while True:
 
         if isCollision(player,enemy):
                 player.hideturtle()
-                enemy.hideturtle()
-                print("Game Over")
+                for e in enemies:
+                    e.hideturtle()
+                winsound.PlaySound("gameover.wav", winsound.SND_ASYNC)
+                gameover_pen=turtle.Turtle()
+                gameover_pen.penup()
+                gameover_pen.speed(0)
+                gameover_pen.color("red")
+                gameover_pen.setposition(0,0)
+                gameover_pen.write("GAME OVER",False,align="center",font=("Arial",20,"normal"))
+                player.setposition(0, 550)
+                gameover_pen.hideturtle()
                 break
-
+    
     #Move the bullet
     if bulletstate=="fire":
         y=bullet.ycor()
